@@ -15,6 +15,9 @@ Rectangle {
     property int tempValue: 0 
     property var lastCpuIdle: 0
     property var lastCpuTotal: 0
+    property int volumeValue: 0
+    property bool isMuted: false
+    property string mediaText: "Nothing playing"
     
     property int fontSize: 14
     property string fontFamily: "sans-serif"
@@ -88,33 +91,84 @@ Rectangle {
         }
     }
 
-    // --- Update Trigger ---
+    // --- Logic: Volume ---
+    Process {
+        id: volProc
+        command: ["sh", "-c", "pamixer --get-volume && pamixer --get-mute"]
+        stdout: SplitParser {
+            onRead: data => {
+                let cleanData = data.trim();
+                if (cleanData === "true") isMuted = true;
+                else if (cleanData === "false") isMuted = false;
+                else {
+                    let val = parseInt(cleanData);
+                    if (!isNaN(val)) volumeValue = val;
+                }
+            }
+        }
+    }
+
+    // --- Logic: Media ---
+    Process {
+        id: mediaProc
+        command: ["sh", "-c", "playerctl metadata --format '{{ artist }} - {{ title }}' | cut -c 1-30"]
+        stdout: SplitParser {
+            onRead: data => {
+                let text = data.trim();
+                mediaText = (text.length > 0 && text !== " - ") ? text : "Stopped";
+            }
+        }
+    }
+
+    // --- Logic: Advanced Player Focus ---
+    Process {
+        id: focusPlayerProc
+        command: ["sh", "-c", "
+            PLAYER=$(playerctl metadata --format '{{playerName}}' | tr '[:upper:]' '[:lower:]')
+            ADDR=$(hyprctl clients -j | jq -r \".[] | select((.class | translate(\\\"[:upper:]\\\", \\\"[:lower:]\\\") == \\\"$PLAYER\\\") or (.initialClass | translate(\\\"[:upper:]\\\", \\\"[:lower:]\\\") == \\\"$PLAYER\\\")) | .address\" | head -n 1)
+            if [ -n \"$ADDR\" ]; then
+                hyprctl dispatch focuswindow address:\"$ADDR\"
+            else
+                hyprctl dispatch focuswindow \"$PLAYER\"
+            fi
+        "]
+    }
+
+    Process { id: volAction }
+
+    // --- Update Timers ---
     Timer {
         interval: 2000
-        running: true
-        repeat: true
+        running: true; repeat: true
         onTriggered: {
             cpuProc.running = true
             memProc.running = true
             tempProc.running = true
+            mediaProc.running = true
         }
         Component.onCompleted: onTriggered()
+    }
+
+    Timer {
+        interval: 500
+        running: true; repeat: true
+        onTriggered: volProc.running = true
     }
 
     // --- UI: Content Row ---
     RowLayout {
         id: contentRow
         anchors.centerIn: parent
-        spacing: 12
+        // --- SPACE REDUCED HERE (from 16 to 8) ---
+        spacing: 8 
 
-        // --- CPU SECTION ---
+        // --- CPU ---
         RowLayout {
             spacing: 8
             Item {
                 width: 32; height: 32
                 Shape {
-                    anchors.centerIn: parent
-                    width: 32; height: 32
+                    anchors.fill: parent
                     layer.enabled: true; layer.samples: 4 
                     ShapePath {
                         fillColor: "transparent"; strokeColor: "#333344"; strokeWidth: 3; capStyle: ShapePath.RoundCap
@@ -125,32 +179,22 @@ Rectangle {
                         PathAngleArc {
                             centerX: 16; centerY: 16; radiusX: 12; radiusY: 12; startAngle: -90
                             sweepAngle: (360 * systemDataRoot.cpuUsage) / 100
-                            Behavior on sweepAngle { NumberAnimation { duration: 600; easing.type: Easing.OutQuad } }
+                            Behavior on sweepAngle { NumberAnimation { duration: 400; easing.type: Easing.OutQuad } }
                         }
                     }
                 }
-                Text {
-                    anchors.centerIn: parent
-                    anchors.verticalCenterOffset: -1 // nudge upward to visually center
-                    text: "󰍛" 
-                    color: "#FFFFFF"
-                    font.family: systemDataRoot.iconFont
-                    font.pixelSize: 14
-                }            
+                Text { anchors.centerIn: parent; text: "󰍛"; color: "#FFFFFF"; font.family: systemDataRoot.iconFont; font.pixelSize: 14 }            
             }
             Text { text: systemDataRoot.cpuUsage + "%"; color: "#FFFFFF"; font.pixelSize: systemDataRoot.fontSize; font.family: systemDataRoot.fontFamily; font.bold: true }
         }
 
-        //Rectangle { Layout.preferredWidth: 1; Layout.preferredHeight: 16; color: "#444455"; opacity: 0.5 }
-
-        // --- MEMORY SECTION ---
+        // --- MEMORY ---
         RowLayout {
             spacing: 8
             Item {
                 width: 32; height: 32
                 Shape {
-                    anchors.centerIn: parent
-                    width: 32; height: 32
+                    anchors.fill: parent
                     layer.enabled: true; layer.samples: 4
                     ShapePath {
                         fillColor: "transparent"; strokeColor: "#333344"; strokeWidth: 3; capStyle: ShapePath.RoundCap
@@ -161,32 +205,22 @@ Rectangle {
                         PathAngleArc {
                             centerX: 16; centerY: 16; radiusX: 12; radiusY: 12; startAngle: -90
                             sweepAngle: (360 * systemDataRoot.memUsage) / 100
-                            Behavior on sweepAngle { NumberAnimation { duration: 600; easing.type: Easing.OutQuad } }
+                            Behavior on sweepAngle { NumberAnimation { duration: 400; easing.type: Easing.OutQuad } }
                         }
                     }
                 }
-                Text {
-                    anchors.centerIn: parent
-                    anchors.verticalCenterOffset: -1
-                    text: "󰘚" 
-                    color: "#FFFFFF"
-                    font.family: systemDataRoot.iconFont
-                    font.pixelSize: 14
-                }            
+                Text { anchors.centerIn: parent; text: "󰘚"; color: "#FFFFFF"; font.family: systemDataRoot.iconFont; font.pixelSize: 14 }            
             }
             Text { text: systemDataRoot.memUsage + "%"; color: "#FFFFFF"; font.pixelSize: systemDataRoot.fontSize; font.family: systemDataRoot.fontFamily; font.bold: true }
         }
 
-        //Rectangle { Layout.preferredWidth: 1; Layout.preferredHeight: 16; color: "#444455"; opacity: 0.5 }
-
-        // --- TEMPERATURE SECTION ---
+        // --- TEMPERATURE ---
         RowLayout {
             spacing: 8
             Item {
                 width: 32; height: 32
                 Shape {
-                    anchors.centerIn: parent
-                    width: 32; height: 32
+                    anchors.fill: parent
                     layer.enabled: true; layer.samples: 4
                     ShapePath {
                         fillColor: "transparent"; strokeColor: "#333344"; strokeWidth: 3; capStyle: ShapePath.RoundCap
@@ -197,20 +231,16 @@ Rectangle {
                         PathAngleArc {
                             centerX: 16; centerY: 16; radiusX: 12; radiusY: 12; startAngle: -90
                             sweepAngle: (360 * Math.min(systemDataRoot.tempValue, 100)) / 100
-                            Behavior on sweepAngle { NumberAnimation { duration: 600; easing.type: Easing.OutQuad } }
+                            Behavior on sweepAngle { NumberAnimation { duration: 400; easing.type: Easing.OutQuad } }
                         }
                     }
                 }
-                Text {
-                    anchors.centerIn: parent
-                    anchors.verticalCenterOffset: -1
-                    text: "" 
-                    color: "#FFFFFF"
-                    font.family: systemDataRoot.iconFont
-                    font.pixelSize: 14
-                }
+                Text { anchors.centerIn: parent; text: ""; color: "#FFFFFF"; font.family: systemDataRoot.iconFont; font.pixelSize: 14 }
             }
             Text { text: systemDataRoot.tempValue + "°C"; color: "#FFFFFF"; font.pixelSize: systemDataRoot.fontSize; font.family: systemDataRoot.fontFamily; font.bold: true }
         }
+
+        Volume {}
+        Media {}
     }
 }
