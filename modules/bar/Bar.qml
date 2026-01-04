@@ -12,6 +12,7 @@ PanelWindow {
     id: bar
 
     property int fontSize: 14
+    property string iconFont: "JetBrainsMono Nerd Font" // Ensure this exists!
 
     // System data
     property int cpuUsage: 0
@@ -77,13 +78,21 @@ PanelWindow {
             // --- RIGHT SPACER ---
             // This pushes the center group back to the middle
             Item { Layout.fillWidth: true }
-            }
 
-            // Color behind the radius of the bar
-            Rectangle {
-                anchors.fill: parent
-                color: "black"
-                z: -1
+            // --- RIGHT GROUP ---
+            RowLayout {
+                spacing: 15
+                QuickSettings { 
+                    iconFont: bar.iconFont 
+                }
             }
+        }
+
+        // Color behind the radius of the bar
+        Rectangle {
+            anchors.fill: parent
+            color: "black"
+            z: -1
+        }
     }
 }

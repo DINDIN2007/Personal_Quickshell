@@ -13,6 +13,9 @@ MouseArea {
     Layout.preferredWidth: volRow.implicitWidth
     Layout.preferredHeight: 38
     cursorShape: Qt.PointingHandCursor
+    
+    // Accept both buttons
+    acceptedButtons: Qt.LeftButton | Qt.RightButton
 
     // --- Logic: Fetch Volume ---
     Process {
@@ -31,7 +34,7 @@ MouseArea {
         }
     }
 
-    // --- Logic: Set Volume ---
+    // --- Logic: Actions ---
     Process { id: volAction }
 
     Timer {
@@ -40,18 +43,28 @@ MouseArea {
         onTriggered: volProc.running = true
     }
 
-    onClicked: { 
-        volAction.command = ["pamixer", "-t"]
-        volAction.running = true
-        volProc.running = true 
+    // --- CLICK HANDLER ---
+    onClicked: (mouse) => { 
+        if (mouse.button === Qt.LeftButton) {
+            // Left Click: Toggle Mute
+            volAction.command = ["pamixer", "-t"]
+            volAction.running = true
+            volProc.running = true 
+        } else if (mouse.button === Qt.RightButton) {
+            // Right Click: Open Pavucontrol
+            volAction.command = ["pavucontrol"]
+            volAction.running = true
+        }
     }
     
+    // Scroll to adjust volume
     onWheel: (wheel) => {
         volAction.command = wheel.angleDelta.y > 0 ? ["pamixer", "-i", "2"] : ["pamixer", "-d", "2"]
         volAction.running = true
         volProc.running = true
     }
 
+    // --- Visuals ---
     RowLayout {
         id: volRow
         anchors.fill: parent
@@ -61,10 +74,14 @@ MouseArea {
             Shape {
                 anchors.fill: parent
                 layer.enabled: true; layer.samples: 4
+                
+                // Background Ring
                 ShapePath {
                     fillColor: "transparent"; strokeColor: "#333344"; strokeWidth: 3; capStyle: ShapePath.RoundCap
                     PathAngleArc { centerX: 16; centerY: 16; radiusX: 12; radiusY: 12; startAngle: -90; sweepAngle: 360 }
                 }
+                
+                // Volume Level Ring
                 ShapePath {
                     fillColor: "transparent"
                     strokeColor: volRoot.isMuted ? "#ff5555" : '#ffffff'

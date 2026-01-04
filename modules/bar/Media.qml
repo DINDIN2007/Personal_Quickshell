@@ -41,12 +41,16 @@ MouseArea {
         "]
     }
 
+    // --- Fix: Correct Timer Logic ---
     Timer {
         interval: 2000
         running: true; repeat: true
-        onTriggered: mediaProc.running = true
-        Component.onCompleted: onTriggered()
+        // Directly set the running property, do not call as function
+        onTriggered: mediaProc.running = true 
     }
+    
+    // Run once on load
+    Component.onCompleted: mediaProc.running = true
 
     onClicked: focusPlayerProc.running = true
 
