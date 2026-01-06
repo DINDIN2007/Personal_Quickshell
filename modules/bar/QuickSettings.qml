@@ -5,14 +5,18 @@ import QtQuick.Layouts
 
 RowLayout {
     id: quickSettingsRoot
-    spacing: 12
+    spacing: 8 
     
     property string iconFont: "JetBrainsMono Nerd Font"
+    
+    // --- Properties ---
     property bool wifiEnabled: false
     property int wifiStrength: 0 
     property string wifiName: "Disconnected"
     property bool btEnabled: false
+    property bool micMuted: false 
 
+    // --- Helper Functions ---
     function getWifiIcon(enabled, strength) {
         if (!enabled) return "󰤭"; 
         if (strength >= 75) return "󰤨"; 
@@ -21,15 +25,12 @@ RowLayout {
         return "󰤯"; 
     }
 
-    // --- Logic: Status Polling ---
+    // --- Status Polling ---
     Process {
         id: wifiStatusProc
         command: [
             "sh", "-c", 
-            "RADIO=$(nmcli -t -f WIFI g); " +
-            "STATE=$(nmcli -t -f STATE g); " +
-            "DATA=$(nmcli -t -f ACTIVE,SSID,SIGNAL dev wifi | grep '^yes'); " + 
-            "echo \"$RADIO:$STATE:$DATA\""
+            "RADIO=$(nmcli -t -f WIFI g); STATE=$(nmcli -t -f STATE g); DATA=$(nmcli -t -f ACTIVE,SSID,SIGNAL dev wifi | grep '^yes'); echo \"$RADIO:$STATE:$DATA\""
         ]
         stdout: SplitParser {
             onRead: data => {
@@ -54,93 +55,135 @@ RowLayout {
     Process {
         id: btStatusProc
         command: ["sh", "-c", "bluetoothctl show | grep 'Powered: yes'"]
-        stdout: SplitParser {
-            onRead: data => { btEnabled = data.trim().length > 0; }
-        }
+        stdout: SplitParser { onRead: data => { btEnabled = data.trim().length > 0; } }
     }
 
-    // --- Logic: Actions ---
+    Process {
+        id: micStatusProc
+        command: ["pamixer", "--default-source", "--get-mute"]
+        stdout: SplitParser { onRead: data => { micMuted = (data.trim() === "true"); } }
+    }
+
+    // --- Actions ---
     Process { 
         id: actionProc
-        // When the command finishes, refresh the status immediately
         onExited: {
             wifiStatusProc.running = true;
             btStatusProc.running = true;
         }
     }
 
+    Process {
+        id: micAction
+        command: ["pamixer", "--default-source", "-t"]
+        onExited: micStatusProc.running = true
+    }
+
+    Process { id: launcherProc }
+
+    // --- NEW: Power Menu Toggle Process ---
+    Process { id: menuToggleProc }
+
     Timer {
-        interval: 3000; running: true; repeat: true
-        onTriggered: { wifiStatusProc.running = true; btStatusProc.running = true }
+        interval: 3000; 
+        running: true; repeat: true
+        onTriggered: { 
+            wifiStatusProc.running = true;
+            btStatusProc.running = true
+            micStatusProc.running = true 
+        }
         Component.onCompleted: onTriggered()
     }
 
-    // --- UI: WiFi ---
+    // --- 1. WiFi ---
     Item {
-        Layout.preferredWidth: 30 
-        Layout.preferredHeight: 38
-        
+        Layout.preferredWidth: 24; Layout.preferredHeight: 28 
         Text {
             anchors.centerIn: parent
             text: quickSettingsRoot.getWifiIcon(quickSettingsRoot.wifiEnabled, quickSettingsRoot.wifiStrength)
-            font.family: quickSettingsRoot.iconFont
-            font.pixelSize: 18
-            // Visual Feedback: Turns Red when pressed, otherwise Blue(On) or Grey(Off)
+            font.family: quickSettingsRoot.iconFont; font.pixelSize: 14 
             color: wifiMouse.pressed ? "#404040" : (quickSettingsRoot.wifiEnabled ? "#ffffff" : "#a8a8a8")
         }
-
         MouseArea {
-            id: wifiMouse
-            anchors.fill: parent
-            cursorShape: Qt.PointingHandCursor
-            acceptedButtons: Qt.LeftButton | Qt.RightButton
-            
+            id: wifiMouse; anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.LeftButton | Qt.RightButton
             onClicked: (mouse) => {
                 if (mouse.button === Qt.LeftButton) {
-                    // TOGGLE WIFI
                     let cmd = quickSettingsRoot.wifiEnabled ? "off" : "on";
                     actionProc.command = ["nmcli", "radio", "wifi", cmd];
                     actionProc.running = true;
                 } else if (mouse.button === Qt.RightButton) {
-                    // OPEN EDITOR
-                    actionProc.command = ["nm-connection-editor"];
-                    actionProc.running = true;
+                    launcherProc.command = ["nm-connection-editor"];
+                    launcherProc.running = true;
                 }
             }
         }
     }
 
-    // --- UI: Bluetooth ---
+    // --- 2. Microphone ---
     Item {
-        Layout.preferredWidth: 30
-        Layout.preferredHeight: 38
+        Layout.preferredWidth: 24; Layout.preferredHeight: 28 
+        Text {
+            anchors.centerIn: parent
+            text: quickSettingsRoot.micMuted ? "󰍭" : "󰍬"
+            font.family: quickSettingsRoot.iconFont; font.pixelSize: 14 
+            color: micMouse.pressed ? "#404040" : (quickSettingsRoot.micMuted ? "#ff5555" : "#ffffff")
+        }
+        MouseArea {
+            id: micMouse; anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.LeftButton | Qt.RightButton
+            onClicked: (mouse) => {
+                if (mouse.button === Qt.LeftButton) {
+                    if (micAction.running) micAction.running = false;
+                    micAction.running = true;
+                } else if (mouse.button === Qt.RightButton) {
+                    launcherProc.command = ["pavucontrol"];
+                    launcherProc.running = true;
+                }
+            }
+        }
+    }
 
+    // --- 3. Bluetooth ---
+    Item {
+        Layout.preferredWidth: 24; Layout.preferredHeight: 28
         Text {
             anchors.centerIn: parent
             text: quickSettingsRoot.btEnabled ? "󰂯" : "󰂲"
-            font.family: quickSettingsRoot.iconFont
-            font.pixelSize: 18
-            // Visual Feedback: Turns Red when pressed, otherwise Purple(On) or Grey(Off)
+            font.family: quickSettingsRoot.iconFont; font.pixelSize: 14 
             color: btMouse.pressed ? '#404040' : (quickSettingsRoot.btEnabled ? '#ffffff' : '#a8a8a8')
         }
-
         MouseArea {
-            id: btMouse
-            anchors.fill: parent
-            cursorShape: Qt.PointingHandCursor
-            acceptedButtons: Qt.LeftButton | Qt.RightButton
-            
+            id: btMouse; anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.LeftButton | Qt.RightButton
             onClicked: (mouse) => {
                 if (mouse.button === Qt.LeftButton) {
-                    // TOGGLE BLUETOOTH
                     let cmd = quickSettingsRoot.btEnabled ? "off" : "on";
                     actionProc.command = ["bluetoothctl", "power", cmd];
                     actionProc.running = true;
                 } else if (mouse.button === Qt.RightButton) {
-                    // OPEN MANAGER
-                    actionProc.command = ["blueman-manager"];
-                    actionProc.running = true;
+                    launcherProc.command = ["blueman-manager"];
+                    launcherProc.running = true;
                 }
+            }
+        }
+    }
+
+    // --- 4. POWER BUTTON ---
+    Item {
+        Layout.preferredWidth: 24;
+        Layout.preferredHeight: 28 
+        Text {
+            anchors.centerIn: parent
+            text: "" 
+            font.family: quickSettingsRoot.iconFont;
+            font.pixelSize: 14 
+            color: pwrMouse.pressed ? "#ff5555" : "#ffffff" 
+        }
+        MouseArea {
+            id: pwrMouse
+            anchors.fill: parent
+            cursorShape: Qt.PointingHandCursor
+            onClicked: {
+                // Toggles the property defined in shell.qml
+                root.powerMenuOpen = !root.powerMenuOpen
             }
         }
     }

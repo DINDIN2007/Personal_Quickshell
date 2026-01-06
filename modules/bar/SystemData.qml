@@ -15,13 +15,15 @@ Rectangle {
     property var lastCpuIdle: 0
     property var lastCpuTotal: 0
     
+    // This will now likely be passed in as 11 or 12 from the main bar
     property int fontSize: 14
     property string fontFamily: "sans-serif"
     property string iconFont: "JetBrainsMono Nerd Font"
 
-    // Layout
-    Layout.preferredHeight: 38
-    Layout.preferredWidth: contentRow.implicitWidth + 30
+    // Layout: Reduced height to 28
+    Layout.preferredHeight: 28
+    Layout.preferredWidth: contentRow.implicitWidth + 20
+    
     color: Colors.widgetBg 
     radius: height / 2
     clip: true
@@ -49,7 +51,8 @@ Rectangle {
                     var idleDiff = idle - lastCpuIdle
                     cpuUsage = Math.round(100 * (diff - idleDiff) / diff)
                 }
-                lastCpuTotal = total; lastCpuIdle = idle
+                lastCpuTotal = total;
+                lastCpuIdle = idle
             }
         }
     }
@@ -67,7 +70,8 @@ Rectangle {
     }
 
     Timer {
-        interval: 2000; running: true; repeat: true
+        interval: 2000;
+        running: true; repeat: true
         onTriggered: systemDataRoot.refreshData()
     }
 
@@ -77,44 +81,63 @@ Rectangle {
     RowLayout {
         id: contentRow
         anchors.centerIn: parent
-        spacing: 12
+        spacing: 8 // Reduced spacing (was 12)
 
         // --- CPU ---
         Item {
             Layout.preferredWidth: cpuRow.implicitWidth
-            Layout.preferredHeight: 32
+            Layout.preferredHeight: 24 // Reduced height (was 32)
 
             RowLayout {
                 id: cpuRow
                 anchors.fill: parent
-                spacing: 8
+                spacing: 6
                 
                 // Pie Chart Container
                 Item {
-                    width: 32; height: 32
+                    width: 24; height: 24 // Reduced size (was 32)
                     Shape {
                         anchors.fill: parent
-                        layer.enabled: true; layer.samples: 4
+                        layer.enabled: true
+                        layer.samples: 8
+                        layer.smooth: true
+                        
                         // Background Ring
                         ShapePath {
-                            fillColor: "transparent"; strokeColor: "#333344"; strokeWidth: 3; capStyle: ShapePath.RoundCap
-                            PathAngleArc { centerX: 16; centerY: 16; radiusX: 12; radiusY: 12; startAngle: -90; sweepAngle: 360 }
+                            fillColor: "transparent"; 
+                            strokeColor: "#333344"; 
+                            strokeWidth: 2; // Thinner stroke (was 3)
+                            capStyle: ShapePath.RoundCap
+                            // Recalculated for 24px box: Center 12, Radius 9
+                            PathAngleArc { centerX: 12; centerY: 12; radiusX: 9; radiusY: 9; startAngle: -90; sweepAngle: 360 }
                         }
                         // Value Ring
                         ShapePath {
                             fillColor: "transparent"
                             strokeColor: systemDataRoot.cpuUsage > 80 ? "#ff5555" : "#8be9fd"
-                            strokeWidth: 3; capStyle: ShapePath.RoundCap
+                            strokeWidth: 2; // Thinner stroke
+                            capStyle: ShapePath.RoundCap
                             PathAngleArc {
-                                centerX: 16; centerY: 16; radiusX: 12; radiusY: 12; startAngle: -90
+                                centerX: 12; centerY: 12; radiusX: 9; radiusY: 9; startAngle: -90
                                 sweepAngle: (360 * systemDataRoot.cpuUsage) / 100
                                 Behavior on sweepAngle { NumberAnimation { duration: 400; easing.type: Easing.OutQuad } }
                             }
                         }
                     }
-                    Text { anchors.centerIn: parent; text: "󰍛"; color: "white"; font.family: systemDataRoot.iconFont; font.pixelSize: 14 }
+                    Text { 
+                        anchors.centerIn: parent; 
+                        text: "󰍛"; 
+                        color: "white"; 
+                        font.family: systemDataRoot.iconFont; 
+                        font.pixelSize: 10 // Reduced icon size (was 14)
+                    }
                 }
-                Text { text: systemDataRoot.cpuUsage + "%"; color: "white"; font.bold: true }
+                Text { 
+                    text: systemDataRoot.cpuUsage + "%"; 
+                    color: "white"; 
+                    font.bold: true 
+                    font.pixelSize: systemDataRoot.fontSize // Ensure text scales
+                }
             }
 
             MouseArea {
@@ -129,36 +152,53 @@ Rectangle {
         // --- MEMORY ---
         Item {
             Layout.preferredWidth: memRow.implicitWidth
-            Layout.preferredHeight: 32
+            Layout.preferredHeight: 24
 
             RowLayout {
                 id: memRow
                 anchors.fill: parent
-                spacing: 8
+                spacing: 6
                 
                 Item {
-                    width: 32; height: 32
+                    width: 24; height: 24
                     Shape {
                         anchors.fill: parent
-                        layer.enabled: true; layer.samples: 4
+                        layer.enabled: true
+                        layer.samples: 8
+                        layer.smooth: true
                         ShapePath {
-                            fillColor: "transparent"; strokeColor: "#333344"; strokeWidth: 3; capStyle: ShapePath.RoundCap
-                            PathAngleArc { centerX: 16; centerY: 16; radiusX: 12; radiusY: 12; startAngle: -90; sweepAngle: 360 }
+                            fillColor: "transparent"; 
+                            strokeColor: "#333344"; 
+                            strokeWidth: 2; 
+                            capStyle: ShapePath.RoundCap
+                            PathAngleArc { centerX: 12; centerY: 12; radiusX: 9; radiusY: 9; startAngle: -90; sweepAngle: 360 }
                         }
                         ShapePath {
                             fillColor: "transparent"
                             strokeColor: systemDataRoot.memUsage > 85 ? "#ff5555" : "#bd93f9"
-                            strokeWidth: 3; capStyle: ShapePath.RoundCap
+                            strokeWidth: 2; 
+                            capStyle: ShapePath.RoundCap
                             PathAngleArc {
-                                centerX: 16; centerY: 16; radiusX: 12; radiusY: 12; startAngle: -90
+                                centerX: 12; centerY: 12; radiusX: 9; radiusY: 9; startAngle: -90
                                 sweepAngle: (360 * systemDataRoot.memUsage) / 100
                                 Behavior on sweepAngle { NumberAnimation { duration: 400; easing.type: Easing.OutQuad } }
                             }
                         }
                     }
-                    Text { anchors.centerIn: parent; text: "󰘚"; color: "white"; font.family: systemDataRoot.iconFont; font.pixelSize: 14 }
+                    Text { 
+                        anchors.centerIn: parent; 
+                        text: "󰘚"; 
+                        color: "white"; 
+                        font.family: systemDataRoot.iconFont; 
+                        font.pixelSize: 10 
+                    }
                 }
-                Text { text: systemDataRoot.memUsage + "%"; color: "white"; font.bold: true }
+                Text { 
+                    text: systemDataRoot.memUsage + "%"; 
+                    color: "white"; 
+                    font.bold: true 
+                    font.pixelSize: systemDataRoot.fontSize
+                }
             }
 
             MouseArea {
@@ -173,36 +213,54 @@ Rectangle {
         // --- TEMPERATURE ---
         Item {
             Layout.preferredWidth: tempRow.implicitWidth
-            Layout.preferredHeight: 32
+            Layout.preferredHeight: 24
 
             RowLayout {
                 id: tempRow
                 anchors.fill: parent
-                spacing: 8
+                spacing: 6
                 
                 Item {
-                    width: 32; height: 32
+                    width: 24; height: 24
                     Shape {
                         anchors.fill: parent
-                        layer.enabled: true; layer.samples: 4
+                        layer.enabled: true
+                        layer.samples: 8
+                        layer.smooth: true
+
                         ShapePath {
-                            fillColor: "transparent"; strokeColor: "#333344"; strokeWidth: 3; capStyle: ShapePath.RoundCap
-                            PathAngleArc { centerX: 16; centerY: 16; radiusX: 12; radiusY: 12; startAngle: -90; sweepAngle: 360 }
+                            fillColor: "transparent"; 
+                            strokeColor: "#333344"; 
+                            strokeWidth: 2; 
+                            capStyle: ShapePath.RoundCap
+                            PathAngleArc { centerX: 12; centerY: 12; radiusX: 9; radiusY: 9; startAngle: -90; sweepAngle: 360 }
                         }
                         ShapePath {
                             fillColor: "transparent"
                             strokeColor: systemDataRoot.tempValue > 75 ? "#ff5555" : "#ffb86c"
-                            strokeWidth: 3; capStyle: ShapePath.RoundCap
+                            strokeWidth: 2; 
+                            capStyle: ShapePath.RoundCap
                             PathAngleArc {
-                                centerX: 16; centerY: 16; radiusX: 12; radiusY: 12; startAngle: -90
+                                centerX: 12; centerY: 12; radiusX: 9; radiusY: 9; startAngle: -90
                                 sweepAngle: (360 * Math.min(systemDataRoot.tempValue, 100)) / 100
                                 Behavior on sweepAngle { NumberAnimation { duration: 400; easing.type: Easing.OutQuad } }
                             }
                         }
                     }
-                    Text { anchors.centerIn: parent; text: ""; color: "white"; font.family: systemDataRoot.iconFont; font.pixelSize: 14 }
+                    Text { 
+                        anchors.centerIn: parent; 
+                        text: ""; 
+                        color: "white"; 
+                        font.family: systemDataRoot.iconFont; 
+                        font.pixelSize: 10 
+                    }
                 }
-                Text { text: systemDataRoot.tempValue + "°C"; color: "white"; font.bold: true }
+                Text { 
+                    text: systemDataRoot.tempValue + "°C"; 
+                    color: "white"; 
+                    font.bold: true 
+                    font.pixelSize: systemDataRoot.fontSize
+                }
             }
 
             MouseArea {

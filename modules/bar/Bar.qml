@@ -11,22 +11,17 @@ import "../styles"
 PanelWindow {
     id: bar
 
-    property int fontSize: 14
-    property string iconFont: "JetBrainsMono Nerd Font" // Ensure this exists!
+    // Use the compact font size
+    property int fontSize: 11
+    property string iconFont: "JetBrainsMono Nerd Font"
 
-    // System data
+    // System data properties (kept for compatibility)
     property int cpuUsage: 0
     property int memUsage: 0
     property int diskUsage: 0
     property int volumeLevel: 0
-
     property string activeWindow: "Window"
-
     property string currentLayout: "Tile"
-
-    // CPU tracking
-    property var lastCpuIdle: 0
-    property var lastCpuTotal: 0
 
     anchors {
         top: true
@@ -40,7 +35,7 @@ PanelWindow {
         right: 0
     }
 
-    implicitHeight: 50
+    implicitHeight: 38
     color: "transparent"
 
     Rectangle {
@@ -49,42 +44,47 @@ PanelWindow {
         topRightRadius: 12
         topLeftRadius: 12
 
+        // --- 1. LEFT GROUP ---
         RowLayout {
-            anchors.fill: parent
-            anchors.leftMargin: 15
-            anchors.rightMargin: 15
-            anchors.verticalCenter: parent.verticalCenter // This centers the whole row vertically
-            spacing: 10
+            anchors.left: parent.left
+            anchors.leftMargin: 8
+            anchors.verticalCenter: parent.verticalCenter
+            spacing: 8
 
-            // --- LEFT GROUP ---
             Logo {}
             ActiveWindow { 
                 fontSize: bar.fontSize 
             }
+        }
 
-            // --- LEFT SPACER ---
-            Item { Layout.fillWidth: true }
+        // --- 2. CENTER GROUP ---
+        // Anchored strictly to the center. It ignores the Left/Right groups.
+        RowLayout {
+            anchors.centerIn: parent
+            spacing: 8
 
-            // --- CENTER GROUP ---
-            RowLayout {
-                spacing: 15
-                SystemData { 
-                    fontSize: bar.fontSize 
-                }
+            SystemData { 
+                fontSize: bar.fontSize 
+            }
             
-                // Add other "centered" things here, like a Media Player or Search icon
+            Workspaces {
+                fontSize: bar.fontSize
             }
 
-            // --- RIGHT SPACER ---
-            // This pushes the center group back to the middle
-            Item { Layout.fillWidth: true }
+            Clock {
+                fontSize: bar.fontSize
+            }
+        }
 
-            // --- RIGHT GROUP ---
-            RowLayout {
-                spacing: 15
-                QuickSettings { 
-                    iconFont: bar.iconFont 
-                }
+        // --- 3. RIGHT GROUP ---
+        RowLayout {
+            anchors.right: parent.right
+            anchors.rightMargin: 8
+            anchors.verticalCenter: parent.verticalCenter
+            spacing: 8
+
+            QuickSettings { 
+                iconFont: bar.iconFont 
             }
         }
 

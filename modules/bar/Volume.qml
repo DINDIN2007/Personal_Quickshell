@@ -10,20 +10,22 @@ MouseArea {
     property int volumeValue: 0
     property bool isMuted: false
 
+    // Layout configuration
     Layout.preferredWidth: volRow.implicitWidth
-    Layout.preferredHeight: 38
+    Layout.preferredHeight: 28 
     cursorShape: Qt.PointingHandCursor
     
-    // Accept both buttons
+    // Accept interactions
     acceptedButtons: Qt.LeftButton | Qt.RightButton
 
-    // --- Logic: Fetch Volume ---
+    // --- Logic: Read Volume ---
     Process {
         id: volProc
         command: ["sh", "-c", "pamixer --get-volume && pamixer --get-mute"]
         stdout: SplitParser {
             onRead: data => {
                 let cleanData = data.trim();
+                // pamixer output parsing
                 if (cleanData === "true") isMuted = true;
                 else if (cleanData === "false") isMuted = false;
                 else {
@@ -34,60 +36,82 @@ MouseArea {
         }
     }
 
-    // --- Logic: Actions ---
-    Process { id: volAction }
+    // --- Logic: Change Volume ---
+    Process { 
+        id: volAction 
+        
+        // FIX: Update the UI immediately after the command finishes
+        onExited: volProc.running = true
+    }
 
+    // Auto-refresh timer (keep UI in sync if changed elsewhere)
     Timer {
-        interval: 500
+        interval: 2000 // Slower polling is fine since we force-update on interaction
         running: true; repeat: true
         onTriggered: volProc.running = true
     }
 
-    // --- CLICK HANDLER ---
+    // --- Interactions ---
     onClicked: (mouse) => { 
         if (mouse.button === Qt.LeftButton) {
             // Left Click: Toggle Mute
             volAction.command = ["pamixer", "-t"]
-            volAction.running = true
-            volProc.running = true 
         } else if (mouse.button === Qt.RightButton) {
-            // Right Click: Open Pavucontrol
+            // Right Click: Open Audio Control (Pavucontrol)
             volAction.command = ["pavucontrol"]
-            volAction.running = true
         }
+        
+        // Force restart action
+        if (volAction.running) volAction.running = false
+        volAction.running = true
     }
     
-    // Scroll to adjust volume
     onWheel: (wheel) => {
-        volAction.command = wheel.angleDelta.y > 0 ? ["pamixer", "-i", "2"] : ["pamixer", "-d", "2"]
+        // Scroll Up = Increase, Scroll Down = Decrease
+        if (wheel.angleDelta.y > 0) {
+            volAction.command = ["pamixer", "-i", "5"] // Changed to 5 for faster scrolling
+        } else {
+            volAction.command = ["pamixer", "-d", "5"]
+        }
+
+        // FIX: Force restart to catch fast scrolling
+        if (volAction.running) volAction.running = false
         volAction.running = true
-        volProc.running = true
     }
 
     // --- Visuals ---
     RowLayout {
         id: volRow
         anchors.fill: parent
-        spacing: 8
+        spacing: 6
+        
         Item {
-            width: 32; height: 32
+            width: 24; height: 24 
+            
             Shape {
                 anchors.fill: parent
-                layer.enabled: true; layer.samples: 4
+                layer.enabled: true
+                layer.samples: 4
+                layer.smooth: true
                 
                 // Background Ring
                 ShapePath {
-                    fillColor: "transparent"; strokeColor: "#333344"; strokeWidth: 3; capStyle: ShapePath.RoundCap
-                    PathAngleArc { centerX: 16; centerY: 16; radiusX: 12; radiusY: 12; startAngle: -90; sweepAngle: 360 }
+                    fillColor: "transparent"; 
+                    strokeColor: "#333344"; 
+                    strokeWidth: 2; 
+                    capStyle: ShapePath.RoundCap
+                    // Center 12, Radius 9
+                    PathAngleArc { centerX: 12; centerY: 12; radiusX: 9; radiusY: 9; startAngle: -90; sweepAngle: 360 }
                 }
                 
                 // Volume Level Ring
                 ShapePath {
                     fillColor: "transparent"
                     strokeColor: volRoot.isMuted ? "#ff5555" : '#ffffff'
-                    strokeWidth: 3; capStyle: ShapePath.RoundCap
+                    strokeWidth: 2; 
+                    capStyle: ShapePath.RoundCap
                     PathAngleArc {
-                        centerX: 16; centerY: 16; radiusX: 12; radiusY: 12; startAngle: -90
+                        centerX: 12; centerY: 12; radiusX: 9; radiusY: 9; startAngle: -90
                         sweepAngle: (360 * Math.min(volRoot.volumeValue, 100)) / 100
                         Behavior on sweepAngle { NumberAnimation { duration: 200; easing.type: Easing.OutQuad } }
                     }
@@ -95,8 +119,11 @@ MouseArea {
             }
             Text { 
                 anchors.centerIn: parent
+                // Icon changes based on volume level
                 text: volRoot.isMuted ? "󰝟" : (volRoot.volumeValue > 50 ? "󰕾" : "󰖀")
-                color: "#FFFFFF"; font.family: volRoot.iconFont; font.pixelSize: 14 
+                color: "#FFFFFF"
+                font.family: volRoot.iconFont
+                font.pixelSize: 10 
             }
         }
     }

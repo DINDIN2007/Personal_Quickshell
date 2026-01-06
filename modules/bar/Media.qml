@@ -5,17 +5,17 @@ import QtQuick.Layouts
 
 MouseArea {
     id: mediaRoot
-    property int fontSize: 14
+    property int fontSize: 11
     property string fontFamily: "sans-serif"
     property string mediaText: "Stopped"
 
-    Layout.preferredHeight: 38
+    Layout.preferredHeight: 28 // Reduced from 38
     Layout.preferredWidth: Math.min(mediaLabel.implicitWidth, 200)
     cursorShape: Qt.PointingHandCursor
     opacity: pressed ? 0.6 : 1.0
     visible: mediaText !== "Stopped"
 
-    // --- Logic: Fetch Media ---
+    // --- Logic ---
     Process {
         id: mediaProc
         command: ["sh", "-c", "playerctl metadata --format '{{ artist }} - {{ title }}' | cut -c 1-30"]
@@ -26,32 +26,16 @@ MouseArea {
             }
         }
     }
-
-    // --- Logic: Advanced Focus ---
     Process {
         id: focusPlayerProc
-        command: ["sh", "-c", "
-            PLAYER=$(playerctl metadata --format '{{playerName}}' | tr '[:upper:]' '[:lower:]')
-            ADDR=$(hyprctl clients -j | jq -r \".[] | select((.class | translate(\\\"[:upper:]\\\", \\\"[:lower:]\\\") == \\\"$PLAYER\\\") or (.initialClass | translate(\\\"[:upper:]\\\", \\\"[:lower:]\\\") == \\\"$PLAYER\\\")) | .address\" | head -n 1)
-            if [ -n \"$ADDR\" ]; then
-                hyprctl dispatch focuswindow address:\"$ADDR\"
-            else
-                hyprctl dispatch focuswindow \"$PLAYER\"
-            fi
-        "]
+        command: ["sh", "-c", "PLAYER=$(playerctl metadata --format '{{playerName}}' | tr '[:upper:]' '[:lower:]'); ADDR=$(hyprctl clients -j | jq -r \".[] | select((.class | translate(\\\"[:upper:]\\\", \\\"[:lower:]\\\") == \\\"$PLAYER\\\") or (.initialClass | translate(\\\"[:upper:]\\\", \\\"[:lower:]\\\") == \\\"$PLAYER\\\")) | .address\" | head -n 1); if [ -n \"$ADDR\" ]; then hyprctl dispatch focuswindow address:\"$ADDR\"; else hyprctl dispatch focuswindow \"$PLAYER\"; fi"]
     }
-
-    // --- Fix: Correct Timer Logic ---
     Timer {
         interval: 2000
         running: true; repeat: true
-        // Directly set the running property, do not call as function
         onTriggered: mediaProc.running = true 
     }
-    
-    // Run once on load
     Component.onCompleted: mediaProc.running = true
-
     onClicked: focusPlayerProc.running = true
 
     Text {
