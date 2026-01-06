@@ -11,7 +11,9 @@ ShellRoot {
   // Global state for the power menu
   property bool powerMenuOpen: false
 
-  Bar {}
+  Bar {
+    onRequestMenuToggle: root.powerMenuOpen = !root.powerMenuOpen
+  }
 
   // --- TOP Left ---
   PanelWindow {
@@ -50,5 +52,7 @@ ShellRoot {
   }
 
   OSD {}
-  PowerMenu {}
+  PowerMenu {
+    powerMenuOpen: root.powerMenuOpen
+  }
 }

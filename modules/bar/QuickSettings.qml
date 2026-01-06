@@ -6,6 +6,8 @@ import QtQuick.Layouts
 RowLayout {
     id: quickSettingsRoot
     spacing: 8 
+
+    signal togglePowerMenu()
     
     property string iconFont: "JetBrainsMono Nerd Font"
     
@@ -183,7 +185,8 @@ RowLayout {
             cursorShape: Qt.PointingHandCursor
             onClicked: {
                 // Toggles the property defined in shell.qml
-                root.powerMenuOpen = !root.powerMenuOpen
+                //root.powerMenuOpen = !root.powerMenuOpen
+                quickSettingsRoot.togglePowerMenu()
             }
         }
     }

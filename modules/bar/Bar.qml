@@ -11,6 +11,8 @@ import "../styles"
 PanelWindow {
     id: bar
 
+    signal requestMenuToggle()
+
     // Use the compact font size
     property int fontSize: 11
     property string iconFont: "JetBrainsMono Nerd Font"
@@ -84,7 +86,9 @@ PanelWindow {
             spacing: 8
 
             QuickSettings { 
-                iconFont: bar.iconFont 
+                iconFont: bar.iconFont
+
+                onTogglePowerMenu: bar.requestMenuToggle()
             }
         }
 
