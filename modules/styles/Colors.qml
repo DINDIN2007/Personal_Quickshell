@@ -6,7 +6,7 @@ QtObject {
     readonly property color barBg: "#18161D"
     readonly property color widgetBg: "#2B2833"
     readonly property color foreground: "#E0DEF4"
-    readonly property color accent: "#C4A7E7"
+    readonly property color accent: "#DE3549"
 
     // Functional Colors
     readonly property color dimmedText: "#908CAA"
@@ -18,7 +18,7 @@ QtObject {
     // 1. The Active Pill Color
     // I mapped this to your 'accent' (Purple) so it matches your theme.
     // If you prefer actual Blue, change this to "#9ccfd8" (Foam) or "#31748f" (Pine)
-    readonly property color blue: accent 
+    readonly property color red: accent 
 
     // 2. The Text/Occupied Dot Color
     readonly property color text: foreground

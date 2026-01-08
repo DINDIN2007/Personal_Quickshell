@@ -1,58 +1,52 @@
 //@ pragma UseQApplication
 import QtQuick
 import Quickshell
-import "./modules/bar/"
-import "./modules/borders/" 
-import "./modules/styles/"
+import Quickshell.Io
+import Quickshell.Wayland
+
+import "./modules"
+import "./modules/bar"
+import "./modules/bar/right_side"
+
+import "./modules/background"
+import "./modules/styles"
+import "./modules/on_screen_display"
+import "./modules/sidebar"
+import "./modules/app_launcher"
 
 ShellRoot {
   id: root
 
   // Global state for the power menu
   property bool powerMenuOpen: false
+  property bool appLauncherOpen: false
 
   Bar {
     onRequestMenuToggle: root.powerMenuOpen = !root.powerMenuOpen
   }
 
-  // --- TOP Left ---
-  PanelWindow {
-      anchors { left: true; top: true;}
-      margins { right: 0; top: 0;}
-      width: 25; height: 25
-      color: "transparent"
-      CornerFiller { anchors.fill: parent; isRight: false; isBottom: false; }
-  }
-
-  // --- TOP RIGHT ---
-  PanelWindow {
-      anchors { right: true; top: true; }
-      margins { right: 0; top: 0; }
-      width: 25; height: 25
-      color: "transparent"
-      CornerFiller { anchors.fill: parent; isRight: true; isBottom: false; }
-  }
-
-  // --- BOTTOM LEFT ---
-  PanelWindow {
-      anchors { left: true; bottom: true; }
-      margins { left: 0; bottom: 0; }
-      width: 25; height: 25
-      color: "transparent"
-      CornerFiller { anchors.fill: parent; isRight: false; isBottom: true; }
-  }
-
-  // --- BOTTOM RIGHT ---
-  PanelWindow {
-      anchors { right: true; bottom: true; }
-      margins { right: 0; bottom: 0; }
-      width: 25; height: 25
-      color: "transparent"
-      CornerFiller { anchors.fill: parent; isRight: true; isBottom: true; }
-  }
+  Corners {}
 
   OSD {}
   PowerMenu {
     powerMenuOpen: root.powerMenuOpen
+  }
+
+  AppLauncher {
+    // Pass the state
+    isOpen: root.appLauncherOpen
+    
+    // SYNC THE STATE when it closes
+    onCloseRequested: root.appLauncherOpen = false
+  }
+
+  // Inside ShellRoot in shell.qml
+  IpcHandler {
+      target: "app_launcher"
+      
+      // Define a function that 'qs msg' can call
+      function toggle(): void {
+          root.appLauncherOpen = !root.appLauncherOpen
+      }
   }
 }

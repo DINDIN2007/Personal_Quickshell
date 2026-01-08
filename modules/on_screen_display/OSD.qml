@@ -114,7 +114,7 @@ PanelWindow {
     Rectangle {
         anchors.fill: parent
         color: "#11111b" 
-        radius: 30       
+        radius: 10       
         
         border.color: "#333333"
         border.width: 1
@@ -190,7 +190,7 @@ PanelWindow {
                         width: (parent.width * osdWindow.currentVal) / 100
                         
                         // Switch color based on type
-                        color: osdWindow.type === "brightness" ? "#bd93f9" : "#8be9fd"
+                        color: osdWindow.type === "brightness" ? "#DE3549" : "#F8A571"
                         
                         Behavior on width { 
                             NumberAnimation { duration: 150; easing.type: Easing.OutQuad } 

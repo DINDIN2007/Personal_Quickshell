@@ -38,17 +38,8 @@ MouseArea {
 
     // --- Logic: Change Volume ---
     Process { 
-        id: volAction 
-        
-        // FIX: Update the UI immediately after the command finishes
+        id: volAction
         onExited: volProc.running = true
-    }
-
-    // Auto-refresh timer (keep UI in sync if changed elsewhere)
-    Timer {
-        interval: 2000 // Slower polling is fine since we force-update on interaction
-        running: true; repeat: true
-        onTriggered: volProc.running = true
     }
 
     // --- Interactions ---
@@ -78,6 +69,8 @@ MouseArea {
         if (volAction.running) volAction.running = false
         volAction.running = true
     }
+
+    Component.onCompleted: volProc.running = true
 
     // --- Visuals ---
     RowLayout {

@@ -8,6 +8,10 @@ import QtQuick.Layouts
 
 import "../styles"
 
+import "./left_side/"
+import "./center_side/"
+import "./right_side/"
+
 PanelWindow {
     id: bar
 
@@ -49,7 +53,7 @@ PanelWindow {
         // --- 1. LEFT GROUP ---
         RowLayout {
             anchors.left: parent.left
-            anchors.leftMargin: 8
+            anchors.leftMargin: 15
             anchors.verticalCenter: parent.verticalCenter
             spacing: 8
 
@@ -73,7 +77,7 @@ PanelWindow {
                 fontSize: bar.fontSize
             }
 
-            Clock {
+            Clock_Pill {
                 fontSize: bar.fontSize
             }
         }
@@ -81,7 +85,7 @@ PanelWindow {
         // --- 3. RIGHT GROUP ---
         RowLayout {
             anchors.right: parent.right
-            anchors.rightMargin: 8
+            anchors.rightMargin: 15
             anchors.verticalCenter: parent.verticalCenter
             spacing: 8
 

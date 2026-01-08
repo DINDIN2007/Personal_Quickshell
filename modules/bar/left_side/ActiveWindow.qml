@@ -3,7 +3,7 @@ import Quickshell.Hyprland
 import Quickshell.Io
 import QtQuick
 import QtQuick.Layouts
-import "../styles"
+import "../../styles"
 
 Rectangle {
     id: activeWindowRoot

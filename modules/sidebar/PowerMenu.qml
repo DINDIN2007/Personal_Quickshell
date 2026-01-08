@@ -3,7 +3,7 @@ import Quickshell.Io
 import QtQuick
 import QtQuick.Layouts
 import "../styles"
-import "../borders/"
+import "../background/"
 
 Item {
     id: powerMenuRoot
@@ -42,7 +42,7 @@ Item {
             id: menuBg
             
             width: 80
-            height: 361 
+            height: 361
             
             // --- 2. CENTER BACKGROUND IN WINDOW ---
             anchors.right: parent.right
@@ -99,15 +99,15 @@ Item {
 
             ColumnLayout {
                 anchors.fill: parent
-                anchors.topMargin: 15; anchors.bottomMargin: 15; spacing: 10
+                anchors.topMargin: 15; anchors.bottomMargin: 15; spacing: 1
 
                 // (Your buttons remain unchanged)
                 // 1. Logout
                 Item {
-                    Layout.preferredWidth: 45; Layout.preferredHeight: 45
+                    Layout.preferredWidth: 50; Layout.preferredHeight: 50
                     Layout.alignment: Qt.AlignHCenter
-                    Rectangle { anchors.fill: parent; radius: 10; color: btn1.containsMouse ? "#333333" : "transparent" }
-                    Text { anchors.centerIn: parent; text: "󰍃"; font.pixelSize: 22; color: "#ffffff"; font.family: "JetBrainsMono Nerd Font" }
+                    Rectangle { anchors.fill: parent; radius: 10; color: btn1.containsMouse ? "#333333" : '#272626' }
+                    Text { anchors.centerIn: parent; text: "󰍃"; font.pixelSize: 30; color: "#ffffff"; font.family: "JetBrainsMono Nerd Font" }
                     MouseArea { id: btn1; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor;
                         onClicked: { actionProc.command = ["hyprctl", "dispatch", "exit"]; actionProc.running = true; powerMenuOpen = false }
                     }
@@ -115,10 +115,10 @@ Item {
 
                 // 2. Update
                 Item {
-                    Layout.preferredWidth: 45; Layout.preferredHeight: 45
+                    Layout.preferredWidth: 50; Layout.preferredHeight: 50
                     Layout.alignment: Qt.AlignHCenter
-                    Rectangle { anchors.fill: parent; radius: 10; color: btnUp.containsMouse ? "#333333" : "transparent" }
-                    Text { anchors.centerIn: parent; text: "󰚰"; font.pixelSize: 22; color: "#ffffff"; font.family: "JetBrainsMono Nerd Font" }
+                    Rectangle { anchors.fill: parent; radius: 10; color: btnUp.containsMouse ? "#333333" : '#272626' }
+                    Text { anchors.centerIn: parent; text: "󰚰"; font.pixelSize: 30; color: "#ffffff"; font.family: "JetBrainsMono Nerd Font" }
                     MouseArea { id: btnUp; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor;
                         onClicked: { launcherProc.command = ["kitty", "-e", "sudo", "pacman", "-Syu"]; launcherProc.running = true; powerMenuOpen = false }
                     }
@@ -135,18 +135,23 @@ Item {
 
                         smooth: true
                         mipmap: true
+
+                        scale: sleepMouse.containsMouse ? 1.15 : 1.0
+                        Behavior on scale {
+                            NumberAnimation { duration: 200; easing.type: Easing.OutCubic}
+                        }
                     }
-                    MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor;
+                    MouseArea { id: sleepMouse; anchors.fill: parent; cursorShape: Qt.PointingHandCursor; hoverEnabled: true
                         onClicked: { actionProc.command = ["systemctl", "suspend"]; actionProc.running = true; powerMenuOpen = false }
                     }
                 }
 
                 // 4. Restart
                 Item {
-                    Layout.preferredWidth: 45; Layout.preferredHeight: 45
+                    Layout.preferredWidth: 50; Layout.preferredHeight: 50
                     Layout.alignment: Qt.AlignHCenter
-                    Rectangle { anchors.fill: parent; radius: 10; color: btnRe.containsMouse ? "#333333" : "transparent" }
-                    Text { anchors.centerIn: parent; text: "󰜉"; font.pixelSize: 22; color: "#ffffff"; font.family: "JetBrainsMono Nerd Font" }
+                    Rectangle { anchors.fill: parent; radius: 10; color: btnRe.containsMouse ? "#333333" : '#272626' }
+                    Text { anchors.centerIn: parent; text: "󰜉"; font.pixelSize: 30; color: "#ffffff"; font.family: "JetBrainsMono Nerd Font" }
                     MouseArea { id: btnRe; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor;
                         onClicked: { actionProc.command = ["systemctl", "reboot"]; actionProc.running = true; powerMenuOpen = false }
                     }
@@ -154,10 +159,10 @@ Item {
 
                 // 5. Power Off
                 Item {
-                    Layout.preferredWidth: 45; Layout.preferredHeight: 45
+                    Layout.preferredWidth: 50; Layout.preferredHeight: 50
                     Layout.alignment: Qt.AlignHCenter
-                    Rectangle { anchors.fill: parent; radius: 10; color: btn4.containsMouse ? "#ff5555" : "transparent" }
-                    Text { anchors.centerIn: parent; text: "󰐥"; font.pixelSize: 24; color: btn4.containsMouse ? "#ffffff" : "#ff5555"; font.family: "JetBrainsMono Nerd Font" }
+                    Rectangle { anchors.fill: parent; radius: 10; color: btn4.containsMouse ? "#ff5555" : '#272626' }
+                    Text { anchors.centerIn: parent; text: "󰐥"; font.pixelSize: 30; color: btn4.containsMouse ? "#ffffff" : "#ff5555"; font.family: "JetBrainsMono Nerd Font" }
                     MouseArea { id: btn4; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor;
                         onClicked: { actionProc.command = ["systemctl", "poweroff"]; actionProc.running = true; powerMenuOpen = false }
                     }

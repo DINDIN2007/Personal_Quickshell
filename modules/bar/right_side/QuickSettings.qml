@@ -177,7 +177,7 @@ RowLayout {
             text: "" 
             font.family: quickSettingsRoot.iconFont;
             font.pixelSize: 14 
-            color: pwrMouse.pressed ? "#ff5555" : "#ffffff" 
+            color: pwrMouse.pressed ? "#ff5555" : "#DE3549" 
         }
         MouseArea {
             id: pwrMouse

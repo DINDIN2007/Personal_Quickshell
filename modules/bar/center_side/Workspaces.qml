@@ -2,7 +2,7 @@ import Quickshell
 import Quickshell.Hyprland
 import QtQuick
 import QtQuick.Layouts
-import "../styles"
+import "../../styles"
 
 Rectangle {
     id: root
@@ -53,7 +53,7 @@ Rectangle {
                     width: parent.isActive ? 20 : 0 // Reduced from 28
                     height: 20
                     radius: 10
-                    color: "#bd93f9"
+                    color: '#de3549'
                     opacity: parent.isActive ? 1 : 0
                     
                     Behavior on width { NumberAnimation { duration: 250; easing.type: Easing.OutBack } }
