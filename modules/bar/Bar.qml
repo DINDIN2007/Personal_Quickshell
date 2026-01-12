@@ -16,6 +16,8 @@ PanelWindow {
     id: bar
 
     signal requestMenuToggle()
+    signal requestClipboardToggle()
+    signal requestNotificationToggle()
 
     // Use the compact font size
     property int fontSize: 11
@@ -91,8 +93,9 @@ PanelWindow {
 
             QuickSettings { 
                 iconFont: bar.iconFont
-
                 onTogglePowerMenu: bar.requestMenuToggle()
+                onToggleClipboard: bar.requestClipboardToggle()
+                onToggleNotifications: bar.requestNotificationToggle()
             }
         }
 

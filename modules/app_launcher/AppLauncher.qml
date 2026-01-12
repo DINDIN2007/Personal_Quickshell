@@ -18,10 +18,54 @@ Scope {
     // Store which screen to show on when launcher opens
     property var activeScreen: Quickshell.screens[0]
     
+    // Helper function to find the screen matching a Hyprland monitor
+    function findScreenForMonitor(monitor) {
+        if (!monitor) return null
+        
+        // Try matching by name first
+        for (let i = 0; i < Quickshell.screens.length; i++) {
+            let screen = Quickshell.screens[i]
+            if (screen.name === monitor.name) {
+                return screen
+            }
+        }
+        
+        // Fallback: match by position
+        for (let i = 0; i < Quickshell.screens.length; i++) {
+            let screen = Quickshell.screens[i]
+            if (screen.x === monitor.x && screen.y === monitor.y) {
+                return screen
+            }
+        }
+        
+        return null
+    }
+    
     onIsOpenChanged: {
+        console.log("isOpen changed to:", isOpen)
         if (isOpen) {
-            // Capture the focused monitor at the moment of opening
-            activeScreen = Hyprland.focusedMonitor?.screen ?? Quickshell.screens[0]
+            let focusedMon = Hyprland.focusedMonitor
+            console.log("Focused monitor:", focusedMon)
+            console.log("Monitor name:", focusedMon?.name)
+            console.log("Monitor screen property:", focusedMon?.screen)
+            
+            // Try multiple methods to get the correct screen
+            let targetScreen = null
+            
+            // Method 1: Direct screen property from Hyprland monitor
+            if (focusedMon?.screen) {
+                targetScreen = focusedMon.screen
+                console.log("Using direct screen property")
+            }
+            // Method 2: Find matching screen by name/position
+            else if (focusedMon) {
+                targetScreen = findScreenForMonitor(focusedMon)
+                console.log("Found screen by matching:", targetScreen?.name)
+            }
+            
+            // Fallback to first screen
+            activeScreen = targetScreen ?? Quickshell.screens[0]
+            console.log("Final activeScreen:", activeScreen?.name)
         }
     }
     

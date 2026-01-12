@@ -11,6 +11,10 @@ Item {
     Layout.preferredWidth: tempRow.implicitWidth
     Layout.preferredHeight: 24
 
+    property int fontSize: 11
+    property string fontFamily: "sans-serif"
+    property string iconFont: "JetBrainsMono Nerd Font"
+
     // --- Properties ---
     property int tempValue: 0
 

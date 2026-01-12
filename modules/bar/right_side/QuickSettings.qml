@@ -8,6 +8,8 @@ RowLayout {
     spacing: 8 
 
     signal togglePowerMenu()
+    signal toggleClipboard()
+    signal toggleNotifications()
     
     property string iconFont: "JetBrainsMono Nerd Font"
     
@@ -97,27 +99,45 @@ RowLayout {
         Component.onCompleted: onTriggered()
     }
 
-    // --- 1. WiFi ---
+    // --- Clipboard Button ---
     Item {
-        Layout.preferredWidth: 24; Layout.preferredHeight: 28 
+        Layout.preferredWidth: 24
+        Layout.preferredHeight: 28
+        
         Text {
             anchors.centerIn: parent
-            text: quickSettingsRoot.getWifiIcon(quickSettingsRoot.wifiEnabled, quickSettingsRoot.wifiStrength)
-            font.family: quickSettingsRoot.iconFont; font.pixelSize: 14 
-            color: wifiMouse.pressed ? "#404040" : (quickSettingsRoot.wifiEnabled ? "#ffffff" : "#a8a8a8")
+            text: "󰅍"  // or "󰆏" for paste icon
+            font.family: quickSettingsRoot.iconFont
+            font.pixelSize: 14
+            color: clipMouse.pressed ? "#404040" : "#ffffff"
         }
+        
         MouseArea {
-            id: wifiMouse; anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.LeftButton | Qt.RightButton
-            onClicked: (mouse) => {
-                if (mouse.button === Qt.LeftButton) {
-                    let cmd = quickSettingsRoot.wifiEnabled ? "off" : "on";
-                    actionProc.command = ["nmcli", "radio", "wifi", cmd];
-                    actionProc.running = true;
-                } else if (mouse.button === Qt.RightButton) {
-                    launcherProc.command = ["nm-connection-editor"];
-                    launcherProc.running = true;
-                }
-            }
+            id: clipMouse
+            anchors.fill: parent
+            cursorShape: Qt.PointingHandCursor
+            onClicked: quickSettingsRoot.toggleClipboard()
+        }
+    }
+
+    // --- Notification Button ---
+    Item {
+        Layout.preferredWidth: 24
+        Layout.preferredHeight: 28
+        
+        Text {
+            anchors.centerIn: parent
+            text: "󰂚"
+            font.family: quickSettingsRoot.iconFont
+            font.pixelSize: 14
+            color: notifMouse.pressed ? "#404040" : "#ffffff"
+        }
+        
+        MouseArea {
+            id: notifMouse
+            anchors.fill: parent
+            cursorShape: Qt.PointingHandCursor
+            onClicked: quickSettingsRoot.toggleNotifications()
         }
     }
 
@@ -138,6 +158,30 @@ RowLayout {
                     micAction.running = true;
                 } else if (mouse.button === Qt.RightButton) {
                     launcherProc.command = ["pavucontrol"];
+                    launcherProc.running = true;
+                }
+            }
+        }
+    }
+
+    // --- 1. WiFi ---
+    Item {
+        Layout.preferredWidth: 24; Layout.preferredHeight: 28 
+        Text {
+            anchors.centerIn: parent
+            text: quickSettingsRoot.getWifiIcon(quickSettingsRoot.wifiEnabled, quickSettingsRoot.wifiStrength)
+            font.family: quickSettingsRoot.iconFont; font.pixelSize: 14 
+            color: wifiMouse.pressed ? "#404040" : (quickSettingsRoot.wifiEnabled ? "#ffffff" : "#a8a8a8")
+        }
+        MouseArea {
+            id: wifiMouse; anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.LeftButton | Qt.RightButton
+            onClicked: (mouse) => {
+                if (mouse.button === Qt.LeftButton) {
+                    let cmd = quickSettingsRoot.wifiEnabled ? "off" : "on";
+                    actionProc.command = ["nmcli", "radio", "wifi", cmd];
+                    actionProc.running = true;
+                } else if (mouse.button === Qt.RightButton) {
+                    launcherProc.command = ["nm-connection-editor"];
                     launcherProc.running = true;
                 }
             }

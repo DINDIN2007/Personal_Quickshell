@@ -20,9 +20,14 @@ ShellRoot {
   // Global state for the power menu
   property bool powerMenuOpen: false
   property bool appLauncherOpen: false
+  property bool clipboardOpen: false
+  property bool notificationOpen: false
 
   Bar {
+    id: mainBar
     onRequestMenuToggle: root.powerMenuOpen = !root.powerMenuOpen
+    onRequestClipboardToggle: root.clipboardOpen = !root.clipboardOpen
+    onRequestNotificationToggle: root.notificationOpen = !root.notificationOpen
   }
 
   Corners {}
@@ -42,11 +47,24 @@ ShellRoot {
 
   // Inside ShellRoot in shell.qml
   IpcHandler {
-      target: "app_launcher"
-      
-      // Define a function that 'qs msg' can call
-      function toggle(): void {
-          root.appLauncherOpen = !root.appLauncherOpen
-      }
+    target: "app_launcher"
+    
+    // Define a function that 'qs msg' can call
+    function toggle(): void {
+        console.log("toggle called, current state:", root.appLauncherOpen)
+        root.appLauncherOpen = !root.appLauncherOpen
+        console.log("new state:", root.appLauncherOpen)
+    }
+  }
+
+  ClipboardPopup {
+    isOpen: root.clipboardOpen
+    parentWindow: mainBar
+    onCloseRequested: root.clipboardOpen = false
+  }
+
+  NotificationPopup {
+    isOpen: root.notificationOpen
+    onCloseRequested: root.notificationOpen = false
   }
 }

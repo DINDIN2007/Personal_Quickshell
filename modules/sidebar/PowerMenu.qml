@@ -29,8 +29,8 @@ Item {
 
         // Increase height to fit both top and bottom fillers
         // 360 (Menu) + 25 (Top Filler) + 25 (Bottom Filler) = 410
-        width: 80 
-        height: 410
+        implicitWidth: 80 
+        implicitHeight: 410
         
         exclusionMode: ExclusionMode.Ignore
         color: "transparent"
@@ -41,8 +41,8 @@ Item {
         Rectangle {
             id: menuBg
             
-            width: 80
-            height: 361
+            implicitWidth: 80
+            implicitHeight: 361
             
             // --- 2. CENTER BACKGROUND IN WINDOW ---
             anchors.right: parent.right

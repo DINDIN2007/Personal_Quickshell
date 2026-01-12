@@ -11,6 +11,10 @@ Item {
     Layout.preferredWidth: cpuRow.implicitWidth
     Layout.preferredHeight: 24 // Reduced height (was 32)
 
+    property int fontSize: 11
+    property string fontFamily: "sans-serif"
+    property string iconFont: "JetBrainsMono Nerd Font"
+
     // --- Properties ---
     property int cpuUsage: 0
     property var lastCpuIdle: 0

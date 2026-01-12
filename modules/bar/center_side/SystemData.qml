@@ -27,10 +27,10 @@ Rectangle {
         interval: 2000;
         running: true; repeat: true
         onTriggered: {
-            cpuRoot.cpuProc.running = true
-            memRoot.memProc.running = true
-            tempRoot.tempProc.running = true
-            volRoot.volProc.running = true
+            if (cpuRoot && cpuRoot.cpuProc) cpuRoot.cpuProc.running = true
+            if (memRoot && memRoot.cpuProc) memRoot.memProc.running = true
+            if (tempRoot && tempRoot.cpuProc) tempRoot.tempProc.running = true
+            if (volRoot && volRoot.cpuProc) volRoot.volProc.running = true
         }
     }
 
@@ -55,7 +55,9 @@ Rectangle {
             id: tempRoot // <--- ADD THIS ID
         }
 
-        Volume {}
+        Volume {
+            id: volRoot
+        }
         Media {}
     }
 }

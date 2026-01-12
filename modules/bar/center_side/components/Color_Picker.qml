@@ -9,10 +9,12 @@ import "../../../styles"
 Text {
     text: "󰴱"
     color: pickerMouse.pressed ? "#DE3549" : "#ffffff"
-    font.pixelSize: 14
-    font.family: clockRoot.iconFont
     Layout.alignment: Qt.AlignVCenter
     Layout.leftMargin: 20
+
+    property int fontSize: 11
+    property string fontFamily: "sans-serif"
+    property string iconFont: "JetBrainsMono Nerd Font"
 
     Process {
         id: colorPickerProc

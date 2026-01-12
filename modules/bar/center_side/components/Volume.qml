@@ -10,6 +10,9 @@ MouseArea {
     property int volumeValue: 0
     property bool isMuted: false
 
+    property int fontSize: 14
+    property string fontFamily: "sans-serif"
+
     // Layout configuration
     Layout.preferredWidth: volRow.implicitWidth
     Layout.preferredHeight: 28 

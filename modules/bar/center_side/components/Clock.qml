@@ -10,10 +10,12 @@ Text {
     id: clockRoot
 
     Layout.alignment: Qt.AlignVCenter 
-    font.pixelSize: clockRoot.fontSize
-    font.family: clockRoot.fontFamily
     font.bold: true
     renderType: Text.NativeRendering
+
+    property int fontSize: 11
+    property string fontFamily: "sans-serif"
+    property string iconFont: "JetBrainsMono Nerd Font"
 
     color: timeMouse.pressed ? "#DE3549" : "#ffffff"
     
@@ -27,6 +29,7 @@ Text {
     Timer { interval: 1000; running: true; repeat: true; onTriggered: clockRoot.updateTime() }
 
     Component.onCompleted: updateTime();
+    Process { id: appLauncher }
 
     // --- MOUSE AREA FOR APPS ---
     MouseArea {

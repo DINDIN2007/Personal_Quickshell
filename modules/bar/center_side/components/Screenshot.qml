@@ -8,9 +8,11 @@ import "../../../styles"
 Text {
     text: "󰆟"
     color: screenshotMouse.pressed ? "#DE3549" : "#ffffff"
-    font.pixelSize: 14
-    font.family: clockRoot.iconFont 
     Layout.alignment: Qt.AlignVCenter
+
+    property int fontSize: 11
+    property string fontFamily: "sans-serif"
+    property string iconFont: "JetBrainsMono Nerd Font"
     
     Process {
         id: screenshotProc

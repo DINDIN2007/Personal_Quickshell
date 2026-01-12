@@ -14,7 +14,7 @@ Scope {
             PanelWindow {
                 screen: cornerScope.targetScreen
                 anchors { left: true; top: true }
-                width: 25; height: 25
+                implicitWidth: 25; implicitHeight: 25
                 color: "transparent"
                 CornerFiller { anchors.fill: parent; isRight: false; isBottom: false }
             }
@@ -23,7 +23,7 @@ Scope {
             PanelWindow {
                 screen: cornerScope.targetScreen
                 anchors { right: true; top: true }
-                width: 25; height: 25
+                implicitWidth: 25; implicitHeight: 25
                 color: "transparent"
                 CornerFiller { anchors.fill: parent; isRight: true; isBottom: false }
             }
@@ -32,7 +32,7 @@ Scope {
             PanelWindow {
                 screen: cornerScope.targetScreen
                 anchors { left: true; bottom: true }
-                width: 25; height: 25
+                implicitWidth: 25; implicitHeight: 25
                 color: "transparent"
                 CornerFiller { anchors.fill: parent; isRight: false; isBottom: true }
             }
@@ -41,7 +41,7 @@ Scope {
             PanelWindow {
                 screen: cornerScope.targetScreen
                 anchors { right: true; bottom: true }
-                width: 25; height: 25
+                implicitWidth: 25; implicitHeight: 25
                 color: "transparent"
                 CornerFiller { anchors.fill: parent; isRight: true; isBottom: true }
             }

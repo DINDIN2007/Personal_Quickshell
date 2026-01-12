@@ -27,8 +27,8 @@ PanelWindow {
     anchors {} // Center on screen
     exclusionMode: ExclusionMode.Ignore // Float over windows
 
-    width: 250
-    height: 60
+    implicitWidth: 250
+    implicitHeight: 60
     
     color: "transparent"
     visible: revealed
