@@ -3,7 +3,6 @@ import Quickshell.Io
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Shapes
-
 import "../../../styles"
 
 Item {
@@ -17,7 +16,6 @@ Item {
 
     // --- Properties ---
     property int tempValue: 0
-
     property alias tempProc: tempProc
 
     // --- Logic ---
@@ -36,9 +34,52 @@ Item {
         id: tempRow
         anchors.fill: parent
         spacing: 6
-        
+
+        // Scale and animation properties
+        scale: mouseArea.pressed ? 0.9 : mouseArea.containsMouse ? 1.08 : 1.0
+        transformOrigin: Item.Center
+
+        Behavior on scale {
+            NumberAnimation {
+                duration: 150
+                easing.type: Easing.OutBack
+            }
+        }
+
         Item {
             width: 24; height: 24
+
+            // Click ripple effect
+            Rectangle {
+                id: ripple
+                anchors.centerIn: parent
+                width: 0
+                height: width
+                radius: width / 2
+                color: "#ffffff"
+                opacity: 0
+
+                ParallelAnimation {
+                    id: rippleAnim
+                    NumberAnimation {
+                        target: ripple
+                        property: "width"
+                        from: 0
+                        to: 40
+                        duration: 300
+                        easing.type: Easing.OutQuad
+                    }
+                    NumberAnimation {
+                        target: ripple
+                        property: "opacity"
+                        from: 0.3
+                        to: 0
+                        duration: 300
+                        easing.type: Easing.OutQuad
+                    }
+                }
+            }
+
             Shape {
                 anchors.fill: parent
                 layer.enabled: true
@@ -46,16 +87,17 @@ Item {
                 layer.smooth: true
 
                 ShapePath {
-                    fillColor: "transparent"; 
-                    strokeColor: "#333344"; 
-                    strokeWidth: 2; 
+                    fillColor: "transparent"
+                    strokeColor: "#333344"
+                    strokeWidth: 2
                     capStyle: ShapePath.RoundCap
                     PathAngleArc { centerX: 12; centerY: 12; radiusX: 9; radiusY: 9; startAngle: -90; sweepAngle: 360 }
                 }
+
                 ShapePath {
                     fillColor: "transparent"
                     strokeColor: tempRoot.tempValue > 75 ? "#ff5555" : "#ffb86c"
-                    strokeWidth: 2; 
+                    strokeWidth: 2
                     capStyle: ShapePath.RoundCap
                     PathAngleArc {
                         centerX: 12; centerY: 12; radiusX: 9; radiusY: 9; startAngle: -90
@@ -64,27 +106,35 @@ Item {
                     }
                 }
             }
-            Text { 
-                anchors.centerIn: parent; 
-                text: ""; 
-                color: "white"; 
-                font.family: tempRoot.iconFont; 
-                font.pixelSize: 10 
+
+            Text {
+                anchors.centerIn: parent
+                text: ""
+                color: "white"
+                font.family: tempRoot.iconFont
+                font.pixelSize: 10
             }
         }
-        Text { 
-            text: tempRoot.tempValue + "°C"; 
-            color: "white"; 
-            font.bold: true 
+
+        Text {
+            text: tempRoot.tempValue + "°C"
+            color: "white"
+            font.bold: true
             font.pixelSize: tempRoot.fontSize
         }
     }
 
     MouseArea {
+        id: mouseArea
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
         acceptedButtons: Qt.LeftButton | Qt.RightButton
-        onClicked: (mouse) => appLauncher.command = (mouse.button === Qt.RightButton) ? ["rog-control-center"] : ["missioncenter"];
-        onPressedChanged: if (pressed) appLauncher.running = true
+        hoverEnabled: true
+
+        onClicked: (mouse) => {
+            rippleAnim.start()
+            appLauncher.command = (mouse.button === Qt.RightButton) ? ["rog-control-center"] : ["missioncenter"]
+            appLauncher.running = true
+        }
     }
 }

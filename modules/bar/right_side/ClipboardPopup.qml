@@ -8,37 +8,37 @@ import "../../styles"
 
 PanelWindow {
     id: clipboardPopup
-    
+
     property bool isOpen: false
     property var parentWindow: null
     property list<string> clipboardHistory: []
-    
+
     signal closeRequested()
-    
+
     visible: isOpen
-    
+
     // This makes clicking outside close the popup
     WlrLayershell.namespace: "clipboard-popup"
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
     exclusionMode: ExclusionMode.Ignore
-    
+
     // Position at the right edge, below the bar
     anchors {
         top: true
         right: true
     }
-    
+
     margins {
         top: 50  // below the bar
         right: 10
     }
-    
+
     implicitWidth: 320
     implicitHeight: Math.min(400, contentColumn.implicitHeight + 20)
-    
+
     color: "transparent"
-    
+
     // Fetch clipboard history using cliphist
     Process {
         id: cliphistProc
@@ -51,59 +51,76 @@ PanelWindow {
             }
         }
     }
-    
+
     // Copy selected item to clipboard
     Process {
         id: copyProc
         property string selectedId: ""
         command: ["sh", "-c", "cliphist decode '" + selectedId + "' | wl-copy"]
     }
-    
+
     // Refresh when opened
     onIsOpenChanged: {
         if (isOpen) {
             cliphistProc.running = true;
         }
     }
-    
+
     Rectangle {
         anchors.fill: parent
         color: Colors.barBg
         radius: 8
         border.color: Colors.widgetBg
         border.width: 1
-        
+
         // Invisible mouse area to detect clicks outside
         // This works by covering the whole popup and letting clicks through
         focus: true
-        
+
         Keys.onEscapePressed: clipboardPopup.closeRequested()
-        
+
         ColumnLayout {
             id: contentColumn
             anchors.fill: parent
             anchors.margins: 10
             spacing: 6
-            
+
             // Header
             RowLayout {
                 Layout.fillWidth: true
-                
+
                 Text {
                     text: "󰅍  Clipboard"
                     color: "#cdd6f4"
                     font.pixelSize: 13
                     font.bold: true
                 }
-                
+
                 Item { Layout.fillWidth: true }
-                
+
                 // Close button
-                Text {
-                    text: "󰅖"
-                    color: closeBtnMouse.containsMouse ? "#f38ba8" : "#6c7086"
-                    font.pixelSize: 12
-                    
+                Item {
+                    width: 20
+                    height: 20
+
+                    Text {
+                        id: closeIcon
+                        anchors.centerIn: parent
+                        text: "󰅖"
+                        color: closeBtnMouse.containsMouse ? "#f38ba8" : "#6c7086"
+                        font.pixelSize: 12
+
+                        scale: closeBtnMouse.pressed ? 0.85 : closeBtnMouse.containsMouse ? 1.15 : 1.0
+                        transformOrigin: Item.Center
+
+                        Behavior on scale {
+                            NumberAnimation {
+                                duration: 150
+                                easing.type: Easing.OutBack
+                            }
+                        }
+                    }
+
                     MouseArea {
                         id: closeBtnMouse
                         anchors.fill: parent
@@ -113,13 +130,13 @@ PanelWindow {
                     }
                 }
             }
-            
+
             Rectangle {
                 Layout.fillWidth: true
                 implicitHeight: 1
                 color: "#45475a"
             }
-            
+
             // Clipboard list
             ListView {
                 id: historyList
@@ -128,15 +145,32 @@ PanelWindow {
                 Layout.preferredHeight: Math.min(300, count * 36)
                 clip: true
                 spacing: 4
-                
+
                 model: clipboardPopup.clipboardHistory
-                
+
                 delegate: Rectangle {
+                    id: delegateRoot
                     width: historyList.width
                     height: 32
                     radius: 6
                     color: itemMouse.containsMouse ? '#3f3f40' : Colors.widgetBg
-                    
+
+                    scale: itemMouse.pressed ? 0.97 : itemMouse.containsMouse ? 1.02 : 1.0
+                    transformOrigin: Item.Center
+
+                    Behavior on scale {
+                        NumberAnimation {
+                            duration: 150
+                            easing.type: Easing.OutBack
+                        }
+                    }
+
+                    Behavior on color {
+                        ColorAnimation {
+                            duration: 150
+                        }
+                    }
+
                     Text {
                         anchors.fill: parent
                         anchors.margins: 8
@@ -151,13 +185,13 @@ PanelWindow {
                         elide: Text.ElideRight
                         maximumLineCount: 1
                     }
-                    
+
                     MouseArea {
                         id: itemMouse
                         anchors.fill: parent
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
-                        
+
                         onClicked: {
                             // Extract the ID (first part before tab)
                             let id = modelData.split('\t')[0];
@@ -168,7 +202,7 @@ PanelWindow {
                     }
                 }
             }
-            
+
             // Empty state
             Text {
                 visible: clipboardPopup.clipboardHistory.length === 0

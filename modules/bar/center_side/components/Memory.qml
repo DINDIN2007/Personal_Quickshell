@@ -37,6 +37,17 @@ Item {
         anchors.fill: parent
         spacing: 6
         
+        // Scale and animation properties
+        scale: mouseArea.pressed ? 0.9 : mouseArea.containsMouse ? 1.08 : 1.0
+        transformOrigin: Item.Center
+
+        Behavior on scale {
+            NumberAnimation {
+                duration: 150
+                easing.type: Easing.OutBack
+            }
+        }
+
         Item {
             width: 24; height: 24
             Shape {
@@ -80,10 +91,16 @@ Item {
     }
 
     MouseArea {
+        id: mouseArea
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
         acceptedButtons: Qt.LeftButton | Qt.RightButton
-        onClicked: (mouse) => appLauncher.command = (mouse.button === Qt.RightButton) ? ["rog-control-center"] : ["missioncenter"];
-        onPressedChanged: if (pressed) appLauncher.running = true
+        hoverEnabled: true
+
+        onClicked: (mouse) => {
+            rippleAnim.start()
+            appLauncher.command = (mouse.button === Qt.RightButton) ? ["rog-control-center"] : ["missioncenter"]
+            appLauncher.running = true
+        }
     }
 }

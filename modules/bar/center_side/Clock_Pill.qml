@@ -23,7 +23,7 @@ Rectangle {
     RowLayout {
         id: contentRow
         anchors.centerIn: parent
-        spacing: 8 
+        spacing: -5
 
         Clock {}
         Color_Picker {}

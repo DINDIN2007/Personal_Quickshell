@@ -13,10 +13,40 @@ Scope {
     id: root
     
     property bool isOpen: false
+    property bool shortcutsOpen: false
     signal closeRequested()
     
     // Store which screen to show on when launcher opens
     property var activeScreen: Quickshell.screens[0]
+    
+    // ============================================
+    // CUSTOMIZE SHORTCUTS HERE
+    // ============================================
+    property var shortcuts: [
+        { category: "General", items: [
+            { keys: "Super", action: "App Launcher" },
+            { keys: "Super + Q", action: "Close Window" },
+            { keys: "Super + T", action: "Terminal" },
+            { keys: "Super + E", action: "File Manager" },
+            { keys: "Super + W", action: "Browser" },
+        ]},
+        { category: "Window Management", items: [
+            { keys: "Super + H/J/K/L", action: "Focus Left/Down/Up/Right" },
+            { keys: "Super + Shift + H/J/K/L", action: "Move Window" },
+            { keys: "Super + F", action: "Fullscreen" },
+            { keys: "Super + V", action: "Toggle Floating" },
+            { keys: "Super + P", action: "Pin Window" },
+        ]},
+        { category: "Workspaces", items: [
+            { keys: "Super + 1-9", action: "Switch Workspace" },
+            { keys: "Super + Shift + 1-9", action: "Move to Workspace" },
+            { keys: "Super + Tab", action: "Previous Workspace" },
+        ]},
+        { category: "System", items: [
+            { keys: "Super + Shift + S", action: "Screenshot" },
+        ]},
+    ]
+    // ============================================
     
     // Helper function to find the screen matching a Hyprland monitor
     function findScreenForMonitor(monitor) {
@@ -42,12 +72,8 @@ Scope {
     }
     
     onIsOpenChanged: {
-        console.log("isOpen changed to:", isOpen)
         if (isOpen) {
             let focusedMon = Hyprland.focusedMonitor
-            console.log("Focused monitor:", focusedMon)
-            console.log("Monitor name:", focusedMon?.name)
-            console.log("Monitor screen property:", focusedMon?.screen)
             
             // Try multiple methods to get the correct screen
             let targetScreen = null
@@ -55,17 +81,17 @@ Scope {
             // Method 1: Direct screen property from Hyprland monitor
             if (focusedMon?.screen) {
                 targetScreen = focusedMon.screen
-                console.log("Using direct screen property")
             }
             // Method 2: Find matching screen by name/position
             else if (focusedMon) {
                 targetScreen = findScreenForMonitor(focusedMon)
-                console.log("Found screen by matching:", targetScreen?.name)
             }
             
             // Fallback to first screen
             activeScreen = targetScreen ?? Quickshell.screens[0]
-            console.log("Final activeScreen:", activeScreen?.name)
+        } else {
+            // Close shortcuts popup when launcher closes
+            shortcutsOpen = false
         }
     }
     
@@ -104,6 +130,7 @@ Scope {
                 searchBox.text = ""
                 appView.currentIndex = 0
                 launcherContent.y = 10000
+                root.shortcutsOpen = false
             }
         }
         
@@ -131,6 +158,7 @@ Scope {
             closeAnimation.start()
         }
 
+        // Background overlay
         Rectangle {
             anchors.fill: parent
             color: "#80000000"
@@ -138,11 +166,16 @@ Scope {
             MouseArea {
                 anchors.fill: parent
                 onClicked: {
-                    if (launcherWindow.canClose) launcherWindow.closeWithAnimation()
+                    if (root.shortcutsOpen) {
+                        root.shortcutsOpen = false
+                    } else if (launcherWindow.canClose) {
+                        launcherWindow.closeWithAnimation()
+                    }
                 }
             }
         }
 
+        // Main launcher content
         Rectangle {
             id: launcherContent
             width: launcherWindow.launcherWidth
@@ -274,58 +307,266 @@ Scope {
                     }
                 }
 
-                TextField {
-                    id: searchBox
+                // Search box row with shortcuts button
+                RowLayout {
                     Layout.fillWidth: true
-                    Layout.preferredHeight: 48
+                    spacing: 8
                     
-                    placeholderText: "Search apps..."
-                    placeholderTextColor: "#6c7086"
-                    font.pixelSize: 16
-                    color: "white"
-                    leftPadding: 16
-                    rightPadding: 16
-                    
-                    background: Rectangle { 
-                        color: "#313244"
-                        radius: 12
-                        border.color: searchBox.activeFocus ? Colors.red : "transparent"
-                        border.width: 2
-                    }
-                    
-                    focus: true
-                    
-                    onTextChanged: { 
-                        appModel.reload()
-                        appView.currentIndex = 0 
-                    }
-                    
-                    Keys.onPressed: (event) => {
-                        if (event.key === Qt.Key_Up) {
-                            if (appView.currentIndex > 0) {
-                                appView.currentIndex--
-                            }
-                            event.accepted = true
-                        } else if (event.key === Qt.Key_Down) {
-                            if (appView.currentIndex < appView.count - 1) {
-                                appView.currentIndex++
-                            }
-                            event.accepted = true
-                        } else if (event.key === Qt.Key_Escape) {
-                            launcherWindow.closeWithAnimation()
-                            event.accepted = true
+                    TextField {
+                        id: searchBox
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 48
+                        
+                        placeholderText: "Search apps..."
+                        placeholderTextColor: "#6c7086"
+                        font.pixelSize: 16
+                        color: "white"
+                        leftPadding: 16
+                        rightPadding: 16
+                        
+                        background: Rectangle { 
+                            color: "#313244"
+                            radius: 12
+                            border.color: searchBox.activeFocus ? Colors.red : "transparent"
+                            border.width: 2
                         }
-                    }
+                        
+                        focus: true
+                        
+                        onTextChanged: { 
+                            appModel.reload()
+                            appView.currentIndex = 0 
+                        }
+                        
+                        Keys.onPressed: (event) => {
+                            if (event.key === Qt.Key_Up) {
+                                if (appView.currentIndex > 0) {
+                                    appView.currentIndex--
+                                }
+                                event.accepted = true
+                            } else if (event.key === Qt.Key_Down) {
+                                if (appView.currentIndex < appView.count - 1) {
+                                    appView.currentIndex++
+                                }
+                                event.accepted = true
+                            } else if (event.key === Qt.Key_Escape) {
+                                if (root.shortcutsOpen) {
+                                    root.shortcutsOpen = false
+                                } else {
+                                    launcherWindow.closeWithAnimation()
+                                }
+                                event.accepted = true
+                            } else if (event.key === Qt.Key_Slash || event.key === Qt.Key_Question) {
+                                root.shortcutsOpen = !root.shortcutsOpen
+                                event.accepted = true
+                            }
+                        }
 
-                    onAccepted: {
-                        if (appView.count > 0 && appView.currentIndex >= 0) {
-                            let apps = appModel.values
-                            if (apps[appView.currentIndex]) {
-                                apps[appView.currentIndex].execute()
-                                launcherWindow.closeWithAnimation()
+                        onAccepted: {
+                            if (appView.count > 0 && appView.currentIndex >= 0) {
+                                let apps = appModel.values
+                                if (apps[appView.currentIndex]) {
+                                    apps[appView.currentIndex].execute()
+                                    launcherWindow.closeWithAnimation()
+                                }
                             }
                         }
                     }
+                    
+                    // Shortcuts button
+                    Rectangle {
+                        Layout.preferredWidth: 48
+                        Layout.preferredHeight: 48
+                        radius: 12
+                        color: shortcutsBtn.containsMouse ? "#45475a" : "#313244"
+                        
+                        Text {
+                            anchors.centerIn: parent
+                            text: "⌨"
+                            font.pixelSize: 20
+                            color: "#cdd6f4"
+                        }
+                        
+                        MouseArea {
+                            id: shortcutsBtn
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: root.shortcutsOpen = !root.shortcutsOpen
+                        }
+                        
+                        ToolTip {
+                            visible: shortcutsBtn.containsMouse && !root.shortcutsOpen
+                            text: "Keyboard Shortcuts (/)"
+                            delay: 500
+                        }
+                    }
+                }
+            }
+        }
+
+        // Shortcuts popup (centered on screen)
+        Rectangle {
+            id: shortcutsPopup
+            width: 600
+            height: Math.min(550, launcherWindow.height - 100)
+            anchors.centerIn: parent
+            
+            color: Colors.barBg
+            radius: 16
+            border.color: "#45475a"
+            border.width: 1
+            
+            visible: root.shortcutsOpen
+            opacity: root.shortcutsOpen ? 1 : 0
+            scale: root.shortcutsOpen ? 1 : 0.95
+            
+            Behavior on opacity { NumberAnimation { duration: 150 } }
+            Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
+            
+            MouseArea {
+                anchors.fill: parent
+                // Prevent clicks from closing
+            }
+            
+            ColumnLayout {
+                anchors.fill: parent
+                anchors.margins: 20
+                spacing: 16
+                
+                // Header
+                RowLayout {
+                    Layout.fillWidth: true
+                    
+                    Text {
+                        text: "⌨  Keyboard Shortcuts"
+                        font.pixelSize: 18
+                        font.weight: Font.DemiBold
+                        color: "#cdd6f4"
+                    }
+                    
+                    Item { Layout.fillWidth: true }
+                    
+                    Rectangle {
+                        width: 28
+                        height: 28
+                        radius: 6
+                        color: closeBtn.containsMouse ? "#45475a" : "transparent"
+                        
+                        Text {
+                            anchors.centerIn: parent
+                            text: "✕"
+                            font.pixelSize: 14
+                            color: "#6c7086"
+                        }
+                        
+                        MouseArea {
+                            id: closeBtn
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: root.shortcutsOpen = false
+                        }
+                    }
+                }
+                
+                Rectangle {
+                    Layout.fillWidth: true
+                    height: 1
+                    color: "#45475a"
+                }
+                
+                // Shortcuts list
+                Flickable {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    contentHeight: shortcutsColumn.height
+                    clip: true
+                    boundsBehavior: Flickable.StopAtBounds
+                    
+                    ColumnLayout {
+                        id: shortcutsColumn
+                        width: parent.width
+                        spacing: 20
+                        
+                        Repeater {
+                            model: root.shortcuts
+                            
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: 8
+                                
+                                // Category header
+                                Text {
+                                    text: modelData.category
+                                    font.pixelSize: 13
+                                    font.weight: Font.DemiBold
+                                    color: Colors.red
+                                    Layout.bottomMargin: 4
+                                }
+                                
+                                // Shortcuts in category
+                                Repeater {
+                                    model: modelData.items
+                                    
+                                    RowLayout {
+                                        Layout.fillWidth: true
+                                        spacing: 16
+                                        
+                                        // Keys
+                                        Row {
+                                            spacing: 4
+                                            Layout.preferredWidth: 200
+                                            
+                                            Repeater {
+                                                model: modelData.keys.split(" + ")
+                                                
+                                                Rectangle {
+                                                    width: keyText.width + 12
+                                                    height: 24
+                                                    radius: 4
+                                                    color: "#313244"
+                                                    border.color: "#45475a"
+                                                    border.width: 1
+                                                    
+                                                    Text {
+                                                        id: keyText
+                                                        anchors.centerIn: parent
+                                                        text: modelData
+                                                        font.pixelSize: 11
+                                                        font.family: "monospace"
+                                                        color: "#cdd6f4"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        
+                                        // Action description
+                                        Text {
+                                            text: modelData.action
+                                            font.pixelSize: 13
+                                            color: "#bac2de"
+                                            Layout.fillWidth: true
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                // Footer hint
+                Rectangle {
+                    Layout.fillWidth: true
+                    height: 1
+                    color: "#45475a"
+                }
+                
+                Text {
+                    text: "Press / or ? to toggle • Esc to close"
+                    font.pixelSize: 11
+                    color: "#6c7086"
+                    Layout.alignment: Qt.AlignHCenter
                 }
             }
         }

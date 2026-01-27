@@ -13,7 +13,8 @@ Rectangle {
     Layout.alignment: Qt.AlignVCenter 
     radius: 8
     color: "#333333" 
-    clip: true 
+    clip: true
+    Layout.leftMargin: 5
 
     property int fontSize: 11
     property string fontFamily: "sans-serif"
