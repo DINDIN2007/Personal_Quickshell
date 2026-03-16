@@ -95,7 +95,7 @@ A huge thank you to the creators of the following dotfiles, which provided massi
     * caelestia-dot shell
     * end-4 dots
 
-Contributing
+## Contributing
 
 Since this a personal project for my own use, I will be updating it on my own.
 However, if you want to make your own version, please feel free to take my code for your own use !
