@@ -29,6 +29,8 @@ Scope {
             { keys: "Super + T", action: "Terminal" },
             { keys: "Super + E", action: "File Manager" },
             { keys: "Super + W", action: "Browser" },
+            { keys: "Super + D", action: "Discord" },
+            { keys: "Super + C", action: "Slack" },
         ]},
         { category: "Window Management", items: [
             { keys: "Super + H/J/K/L", action: "Focus Left/Down/Up/Right" },
@@ -40,7 +42,7 @@ Scope {
         { category: "Workspaces", items: [
             { keys: "Super + 1-9", action: "Switch Workspace" },
             { keys: "Super + Shift + 1-9", action: "Move to Workspace" },
-            { keys: "Super + Tab", action: "Previous Workspace" },
+            { keys: "Super + Tab", action: "Show All Workspace" },
         ]},
         { category: "System", items: [
             { keys: "Super + Shift + S", action: "Screenshot" },
@@ -414,7 +416,7 @@ Scope {
             
             color: Colors.barBg
             radius: 16
-            border.color: "#45475a"
+            //border.color: "#45475a"
             border.width: 1
             
             visible: root.shortcutsOpen
