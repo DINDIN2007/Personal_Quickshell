@@ -52,7 +52,7 @@ PanelWindow {
         topRightRadius: 12
         topLeftRadius: 12
 
-        // --- 1. LEFT GROUP ---
+        // --- LEFT GROUP ---
         RowLayout {
             anchors.left: parent.left
             anchors.leftMargin: 15
@@ -65,7 +65,7 @@ PanelWindow {
             }
         }
 
-        // --- 2. CENTER GROUP ---
+        // --- CENTER GROUP ---
         // Anchored strictly to the center. It ignores the Left/Right groups.
         RowLayout {
             anchors.centerIn: parent
@@ -84,7 +84,7 @@ PanelWindow {
             }
         }
 
-        // --- 3. RIGHT GROUP ---
+        // --- RIGHT GROUP ---
         RowLayout {
             anchors.right: parent.right
             anchors.rightMargin: 15

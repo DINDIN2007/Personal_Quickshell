@@ -124,7 +124,7 @@ PanelWindow {
             anchors.margins: 15
             spacing: 15
 
-            // 1. Icon Container
+            // Icon Container
             Item {
                 Layout.preferredWidth: 30
                 Layout.preferredHeight: 30
@@ -146,7 +146,7 @@ PanelWindow {
                 }
             }
 
-            // 2. Data Column
+            // Data Column
             ColumnLayout {
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignVCenter

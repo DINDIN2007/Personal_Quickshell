@@ -41,7 +41,7 @@ Rectangle {
     Timer { interval: 500; running: true; repeat: true; onTriggered: windowProc.running = true }
 
     // --- UI ---
-    Layout.preferredHeight: 24 // Reduced from 30 (even smaller than others to fit tight text)
+    Layout.preferredHeight: 24
     Layout.preferredWidth: titleRow.childrenRect.width + 16
 
     color: Colors.barBg
@@ -51,7 +51,7 @@ Rectangle {
     ColumnLayout {
         id: titleRow
         anchors.centerIn: parent
-        spacing: -2 // Tighter vertical spacing
+        spacing: -2
 
         Text {
             text: windowClass

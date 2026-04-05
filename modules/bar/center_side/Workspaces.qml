@@ -11,8 +11,8 @@ Rectangle {
     property int fontSize: 11
     property string fontFamily: "sans-serif"
     
-    Layout.preferredHeight: 28 // Reduced from 38
-    Layout.preferredWidth: row.implicitWidth + 12 // Tighter padding
+    Layout.preferredHeight: 28
+    Layout.preferredWidth: row.implicitWidth + 12
 
     color: Colors.widgetBg
     radius: height / 2
@@ -43,14 +43,13 @@ Rectangle {
                 property bool isOccupied: wsObject !== undefined
                 property bool isActive: Hyprland.focusedMonitor && Hyprland.focusedMonitor.activeWorkspace.id === wsId
 
-                // Sizing: Reduced from 32x32
                 width: 24
                 height: 24
 
-                // 1. The Sliding "Pill"
+                // The Sliding "Pill"
                 Rectangle {
                     anchors.centerIn: parent
-                    width: parent.isActive ? 20 : 0 // Reduced from 28
+                    width: parent.isActive ? 20 : 0
                     height: 20
                     radius: 10
                     color: '#de3549'
@@ -71,7 +70,7 @@ Rectangle {
                     font.bold: true
                 }
 
-                // 3. Click to switch
+                // Click to switch
                 MouseArea {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor

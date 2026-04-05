@@ -16,8 +16,6 @@ QtObject {
     // --- NEW MAPPINGS FOR WORKSPACES (Required) ---
     
     // 1. The Active Pill Color
-    // I mapped this to your 'accent' (Purple) so it matches your theme.
-    // If you prefer actual Blue, change this to "#9ccfd8" (Foam) or "#31748f" (Pine)
     readonly property color red: accent 
 
     // 2. The Text/Occupied Dot Color

@@ -68,7 +68,6 @@ MouseArea {
             volAction.command = ["pamixer", "-d", "5"]
         }
 
-        // FIX: Force restart to catch fast scrolling
         if (volAction.running) volAction.running = false
         volAction.running = true
     }

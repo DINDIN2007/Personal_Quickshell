@@ -5,7 +5,7 @@ import QtQuick.Layouts
 
 import "../../../styles"
 
-// 3. Brightness Control
+// Brightness Control
 Item {
     id: brightnessRoot
 

@@ -42,17 +42,17 @@ Rectangle {
 
         // --- CPU ---
         CPU {
-            id: cpuRoot  // <--- ADD THIS ID
+            id: cpuRoot
         }
 
         // --- MEMORY ---
         Memory {
-            id: memRoot  // <--- ADD THIS ID
+            id: memRoot
         }
 
         // --- TEMPERATURE ---
         Temperature {
-            id: tempRoot // <--- ADD THIS ID
+            id: tempRoot
         }
 
         Volume {

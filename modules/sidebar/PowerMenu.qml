@@ -14,21 +14,14 @@ Item {
         id: powerMenuWindow
         property alias powerMenuOpen: powerMenuWindow.visible
         
-        // --- 1. CENTER THE WINDOW ---
-        // By removing 'top: true' and only keeping 'right: true', 
-        // Wayland/Quickshell defaults to centering it vertically.
         anchors {
             top: false
             bottom: false
             right: true
             left: false
         }
-        
-        // Remove margins that pushed it down
-        margins.top: 0
 
-        // Increase height to fit both top and bottom fillers
-        // 360 (Menu) + 25 (Top Filler) + 25 (Bottom Filler) = 410
+        margins.top: 0
         implicitWidth: 80 
         implicitHeight: 410
         
@@ -43,8 +36,7 @@ Item {
             
             implicitWidth: 80
             implicitHeight: 361
-            
-            // --- 2. CENTER BACKGROUND IN WINDOW ---
+
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
 
@@ -63,30 +55,22 @@ Item {
             }
             
             color: Colors.barBg
-            
-            // --- 3. SYMMETRY ---
-            // Since it is centered, round both left corners
             topLeftRadius: 20
             bottomLeftRadius: 20
             
             // border.color: "#333333"
             // border.width: 1
 
-            // --- 4. TOP CORNER FILLER ---
-            // Curves upwards from the top of the menu
             CornerFiller {
                 anchors.bottom: parent.top
                 anchors.right: parent.right
                 isRight: true
-                // Invert 'isBottom' compared to the bottom filler to flip the curve
                 isBottom: true 
                 
                 visible: powerMenuOpen
                 cornerColor: Colors.barBg
             }
 
-            // --- BOTTOM CORNER FILLER ---
-            // Curves downwards from the bottom of the menu
             CornerFiller {
                 anchors.top: parent.bottom
                 anchors.right: parent.right
@@ -100,8 +84,7 @@ Item {
             ColumnLayout {
                 anchors.fill: parent
                 anchors.topMargin: 15; anchors.bottomMargin: 15; spacing: 1
-
-                // (Your buttons remain unchanged)
+                
                 // 1. Logout
                 Item {
                     Layout.preferredWidth: 50; Layout.preferredHeight: 50
